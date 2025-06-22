@@ -52,22 +52,124 @@
             <mat-icon>print</mat-icon>
             Print
           </button>
-
-          <button 
-            mat-stroked-button 
-            color="primary" 
-            type="button"
-            (click)="mailPayslip()"
-            [disabled]="!pdfUrl">
-            <mat-icon>email</mat-icon>
-            Email
-          </button>
         </div>
       </form>
 
       <div *ngIf="error" class="error-message">
         <mat-icon color="warn">error</mat-icon>
         {{ error }}
+      </div>
+
+      <!-- Real-time Payslip Data Analysis -->
+      <div *ngIf="payslipData && !isLoading" class="payslip-analysis">
+        <mat-card class="analysis-card">
+          <mat-card-header>
+            <mat-card-title>Salary Analysis - {{ getSelectedMonthYear() }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="analysis-grid">
+              <!-- Basic Information -->
+              <div class="info-section">
+                <h4>Employee Information</h4>
+                <div class="info-item">
+                  <span class="label">Employee ID:</span>
+                  <span class="value">{{ payslipData.PERNR || 'N/A' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Name:</span>
+                  <span class="value">{{ payslipData.ENAME || 'N/A' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Position:</span>
+                  <span class="value">{{ payslipData.PLANS || 'N/A' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Pay Period:</span>
+                  <span class="value">{{ formatPayPeriod(payslipData.BEGDA, payslipData.ENDDA) }}</span>
+                </div>
+              </div>
+
+              <!-- Earnings Breakdown -->
+              <div class="earnings-section">
+                <h4>Earnings</h4>
+                <div class="amount-item positive">
+                  <span class="label">Basic Salary:</span>
+                  <span class="value">{{ formatCurrency(payslipData.BASIC_SALARY) }}</span>
+                </div>
+                <div class="amount-item positive">
+                  <span class="label">Allowances:</span>
+                  <span class="value">{{ formatCurrency(payslipData.ALLOWANCES) }}</span>
+                </div>
+                <div class="amount-item positive">
+                  <span class="label">Overtime:</span>
+                  <span class="value">{{ formatCurrency(payslipData.OVERTIME) }}</span>
+                </div>
+                <div class="amount-item positive total">
+                  <span class="label">Gross Salary:</span>
+                  <span class="value">{{ formatCurrency(payslipData.GROSS_SALARY) }}</span>
+                </div>
+              </div>
+
+              <!-- Deductions Breakdown -->
+              <div class="deductions-section">
+                <h4>Deductions</h4>
+                <div class="amount-item negative">
+                  <span class="label">Tax:</span>
+                  <span class="value">{{ formatCurrency(payslipData.TAX) }}</span>
+                </div>
+                <div class="amount-item negative">
+                  <span class="label">Social Security:</span>
+                  <span class="value">{{ formatCurrency(payslipData.SOCIAL_SECURITY) }}</span>
+                </div>
+                <div class="amount-item negative">
+                  <span class="label">Insurance:</span>
+                  <span class="value">{{ formatCurrency(payslipData.INSURANCE) }}</span>
+                </div>
+                <div class="amount-item negative">
+                  <span class="label">Other Deductions:</span>
+                  <span class="value">{{ formatCurrency(payslipData.OTHER_DEDUCTIONS) }}</span>
+                </div>
+                <div class="amount-item negative total">
+                  <span class="label">Total Deductions:</span>
+                  <span class="value">{{ formatCurrency(payslipData.TOTAL_DEDUCTIONS) }}</span>
+                </div>
+              </div>
+
+              <!-- Net Pay -->
+              <div class="net-pay-section">
+                <h4>Net Pay</h4>
+                <div class="amount-item net-pay">
+                  <span class="label">Net Salary:</span>
+                  <span class="value">{{ formatCurrency(payslipData.NET_SALARY) }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Payment Date:</span>
+                  <span class="value">{{ formatDate(payslipData.PAYMENT_DATE) }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Payment Method:</span>
+                  <span class="value">{{ payslipData.PAYMENT_METHOD || 'Bank Transfer' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Summary Statistics -->
+            <div class="summary-stats">
+              <div class="stat-card">
+                <div class="stat-value">{{ calculateTaxPercentage() }}%</div>
+                <div class="stat-label">Tax Rate</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">{{ calculateDeductionPercentage() }}%</div>
+                <div class="stat-label">Total Deductions</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">{{ formatCurrency(payslipData.NET_SALARY) }}</div>
+                <div class="stat-label">Take Home</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
       </div>
 
       <div *ngIf="pdfUrl" class="pdf-preview">
